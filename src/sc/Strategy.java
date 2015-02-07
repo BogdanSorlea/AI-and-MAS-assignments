@@ -1,7 +1,10 @@
 package sc;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Stack;
 
 import sc.SearchClient.Memory;
 
@@ -9,7 +12,7 @@ public abstract class Strategy {
 
 	public HashSet< Node > explored;
 	public long startTime = System.currentTimeMillis();
-
+	
 	public Strategy() {
 		explored = new HashSet< Node >();
 	}
@@ -81,33 +84,44 @@ public abstract class Strategy {
 	}
 
 	public static class StrategyDFS extends Strategy {
+		
+		//private ArrayList<Node> frontier;
+		private Stack<Node> frontier;
+		
 		public StrategyDFS() {
 			super();
-			// Unimplemented			
+			//frontier = new ArrayList<Node>();		
+			frontier = new Stack<Node>();
 		}
 
 		public Node getAndRemoveLeaf() {
-			// Unimplemented
-			return null;
+			Node leaf = null;
+			/*
+			if(!frontier.isEmpty()){
+				leaf = frontier.get(frontier.size()-1);
+				frontier.remove(frontier.size()-1);
+			}
+			*/
+			leaf = frontier.size() > 0 ? frontier.pop() : null;
+			return leaf;
 		}
 
 		public void addToFrontier( Node n ) {
-			// Unimplemented
+			//frontier.add(n);
+			frontier.push(n);
+			return;
 		}
 
 		public int countFrontier() {
-			// Unimplemented
-			return 0;
+			return frontier.size();
 		}
 
 		public boolean frontierIsEmpty() {
-			// Unimplemented
-			return true;
+			return frontier.isEmpty();
 		}
 
 		public boolean inFrontier( Node n ) {
-			// Unimplemented
-			return false;
+			return frontier.contains(n);
 		}
 
 		public String toString() {
