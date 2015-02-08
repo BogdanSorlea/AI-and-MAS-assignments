@@ -76,12 +76,14 @@ public class SearchClient {
 		
 		initialState = new Node( null );
 		
-		int max_columns = 0;
+		//int max_columns = 0;
 		
 		while ( !line.equals( "" ) ) {
+			/*
 			if (line.length() > max_columns) {
 				max_columns = line.length();
 			}
+			*/
 			ArrayList<Boolean> wallsLine = new ArrayList<Boolean>();
 			ArrayList<Character> goalsLine = new ArrayList<Character>();
 			ArrayList<Character> boxesLine = new ArrayList<Character>();
@@ -121,7 +123,7 @@ public class SearchClient {
 			line = serverMessages.readLine();
 			levelLines++;
 		}
-		
+		/*
 		for (int i=0; i<levelLines; i++) {
 			for (int j=0; j<max_columns - NodeStatics.walls.get(i).size(); j++) {
 				NodeStatics.walls.get(i).add(false);
@@ -135,6 +137,7 @@ public class SearchClient {
 				initialState.boxes.get(i).add((char) 0);
 			}
 		}
+		*/
 	}
 
 	public LinkedList< Node > Search( Strategy strategy ) throws IOException {
@@ -185,9 +188,9 @@ public class SearchClient {
 		SearchClient client = new SearchClient( serverMessages );
 
 		Strategy strategy = null;
-		//strategy = new StrategyBFS();
+		strategy = new StrategyBFS();
 		// Ex 1:
-		strategy = new StrategyDFS();
+		//strategy = new StrategyDFS();
 		
 		// Ex 3:
 		//strategy = new StrategyBestFirst( new AStar( client.initialState ) );

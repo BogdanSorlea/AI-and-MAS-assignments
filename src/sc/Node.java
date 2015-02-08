@@ -64,7 +64,7 @@ public class Node {
 		}
 		*/
 		for (int row=0; row<NodeStatics.goals.size(); row++) {
-			for (int col=0; col<NodeStatics.goals.get(0).size(); col++) {
+			for (int col=0; col<NodeStatics.goals.get(row).size(); col++) {
 				char g = NodeStatics.goals.get(row).get(col);
 				char b = Character.toLowerCase( boxes.get(row).get(col) );
 				if ( g > 0 && b != g) {
