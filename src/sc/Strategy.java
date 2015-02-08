@@ -1,10 +1,10 @@
 package sc;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Map;
 import java.util.Stack;
+import java.util.TreeMap;
 
 import sc.SearchClient.Memory;
 
@@ -132,33 +132,55 @@ public abstract class Strategy {
 	// Ex 3: Best-first Search uses a priority queue (Java contains no implementation of a Heap data structure)
 	public static class StrategyBestFirst extends Strategy {
 		private Heuristic heuristic;
+		private TreeMap<Integer, ArrayDeque<Node>> frontier;
 		public StrategyBestFirst( Heuristic h ) {
 			super();
 			heuristic = h;
-			// Unimplemented
+			frontier = new TreeMap<Integer, ArrayDeque<Node>>();
 		}
 		public Node getAndRemoveLeaf() {
-			// Unimplemented
-			return null;
+			Node leaf = null;
+			leaf = frontier.firstEntry().getValue().pollFirst();
+			if ( frontier.firstEntry().getValue().size() == 0 ) {
+				frontier.remove(frontier.firstKey());
+			}
+			return leaf;
 		}
 
 		public void addToFrontier( Node n ) {
-			// Unimplemented
+			int key = heuristic.f(n);
+			if ( frontier.get(key) == null ) {
+				frontier.put(key, new ArrayDeque<Node>());
+			}
+			frontier.get(key).add(n);
 		}
 
 		public int countFrontier() {
-			// Unimplemented
-			return 0;
+			int count = 0;
+			for (Map.Entry<Integer, ArrayDeque<Node>> nodeList : frontier.entrySet()) {
+				count += nodeList.getValue().size();
+			}
+			return count;
 		}
 
 		public boolean frontierIsEmpty() {
-			// Unimplemented
-			return true;
+			boolean isEmpty = true;
+			for (Map.Entry<Integer, ArrayDeque<Node>> nodeList : frontier.entrySet()) {
+				if ( nodeList.getValue() != null ) {
+					isEmpty = false;
+				}
+			}
+			return isEmpty;
 		}
 
 		public boolean inFrontier( Node n ) {
-			// Unimplemented
-			return false;
+			boolean inFrontier = false;
+			for (Map.Entry<Integer, ArrayDeque<Node>> nodeList : frontier.entrySet()) {
+				if ( nodeList.getValue().contains(n) ) {
+					inFrontier = true;
+				}
+			}
+			return inFrontier;
 		}
 
 		public String toString() {
