@@ -12,6 +12,7 @@ import sc.Heuristic.*;
 import sc.Strategy.*;
 
 public class SearchClient {
+	
 	// Auxiliary static classes
 	public static void error( String msg ) throws Exception {
 		throw new Exception( "GSCError: " + msg );
@@ -74,12 +75,26 @@ public class SearchClient {
 		}
 		
 		initialState = new Node( null );
-
+		
+		int max_columns = 0;
+		
 		while ( !line.equals( "" ) ) {
+			if (line.length() > max_columns) {
+				max_columns = line.length();
+			}
+			ArrayList<Boolean> wallsLine = new ArrayList<Boolean>();
+			ArrayList<Character> goalsLine = new ArrayList<Character>();
+			ArrayList<Character> boxesLine = new ArrayList<Character>();
+			
 			for ( int i = 0; i < line.length(); i++ ) {
 				char chr = line.charAt( i );
+				boolean wallItem = false;
+				char goalItem = (char) 0;
+				char boxItem = (char) 0;
+				
 				if ( '+' == chr ) { // Walls
-					initialState.walls[levelLines][i] = true;
+					wallItem = true;
+					//initialState.statics.walls[levelLines][i] = true;
 				} else if ( '0' <= chr && chr <= '9' ) { // Agents
 					if ( agentCol != -1 || agentRow != -1 ) {
 						error( "Not a single agent level" );
@@ -87,13 +102,38 @@ public class SearchClient {
 					initialState.agentRow = levelLines;
 					initialState.agentCol = i;
 				} else if ( 'A' <= chr && chr <= 'Z' ) { // Boxes
-					initialState.boxes[levelLines][i] = chr;
+					boxItem = chr;
+					//initialState.boxes[levelLines][i] = chr;
 				} else if ( 'a' <= chr && chr <= 'z' ) { // Goal cells
-					initialState.goals[levelLines][i] = chr;
+					goalItem = chr;
+					//initialState.statics.goals[levelLines][i] = chr;
 				}
+				
+				wallsLine.add(wallItem);
+				goalsLine.add(goalItem);
+				boxesLine.add(boxItem);
 			}
+			
+			NodeStatics.walls.add(wallsLine);
+			NodeStatics.goals.add(goalsLine);
+			initialState.boxes.add(boxesLine);
+			
 			line = serverMessages.readLine();
 			levelLines++;
+		}
+		
+		for (int i=0; i<levelLines; i++) {
+			for (int j=0; j<max_columns - NodeStatics.walls.get(i).size(); j++) {
+				NodeStatics.walls.get(i).add(false);
+			}
+			
+			for (int j=0; j<max_columns - NodeStatics.goals.get(i).size(); j++) {
+				NodeStatics.goals.get(i).add((char) 0);
+			}
+			
+			for (int j=0; j<max_columns - initialState.boxes.get(i).size(); j++) {
+				initialState.boxes.get(i).add((char) 0);
+			}
 		}
 	}
 
@@ -137,7 +177,7 @@ public class SearchClient {
 
 	public static void main( String[] args ) throws Exception {
 		BufferedReader serverMessages = new BufferedReader( new InputStreamReader( System.in ) );
-
+		
 		// Use stderr to print to console
 		System.err.println( "SearchClient initializing. I am sending this using the error output stream." );
 
@@ -145,9 +185,9 @@ public class SearchClient {
 		SearchClient client = new SearchClient( serverMessages );
 
 		Strategy strategy = null;
-		strategy = new StrategyBFS();
+		//strategy = new StrategyBFS();
 		// Ex 1:
-		//strategy = new StrategyDFS();
+		strategy = new StrategyDFS();
 		
 		// Ex 3:
 		//strategy = new StrategyBestFirst( new AStar( client.initialState ) );

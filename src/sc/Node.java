@@ -12,8 +12,6 @@ import sc.Command.type;
 public class Node {
 
 	private static Random rnd = new Random( 1 ); 
-	public static int MAX_ROW = 70;
-	public static int MAX_COLUMN = 70;
 
 	public int agentRow;
 	public int agentCol;
@@ -28,9 +26,7 @@ public class Node {
 	// walls[row][col] is true if there's a wall at (row, col)
 	//
 
-	public boolean[][] walls = new boolean[MAX_ROW][MAX_COLUMN];
-	public char[][] boxes = new char[MAX_ROW][MAX_COLUMN]; 
-	public char[][] goals = new char[MAX_ROW][MAX_COLUMN];
+	public ArrayList<ArrayList<Character>> boxes;
 
 	public Node parent;
 	public Command action;
@@ -39,6 +35,7 @@ public class Node {
 
 	public Node( Node parent ) {
 		this.parent = parent;
+		this.boxes = new ArrayList<ArrayList<Character>>();
 		if ( parent == null ) {
 			g = 0;
 		} else {
@@ -55,10 +52,21 @@ public class Node {
 	}
 
 	public boolean isGoalState() {
+		/*
 		for ( int row = 1; row < MAX_ROW - 1; row++ ) {
 			for ( int col = 1; col < MAX_COLUMN - 1; col++ ) {
-				char g = goals[row][col];
+				char g = NodeStatics.goals.get(row).get(col);
 				char b = Character.toLowerCase( boxes[row][col] );
+				if ( g > 0 && b != g) {
+					return false;
+				}
+			}
+		}
+		*/
+		for (int row=0; row<NodeStatics.goals.size(); row++) {
+			for (int col=0; col<NodeStatics.goals.get(0).size(); col++) {
+				char g = NodeStatics.goals.get(row).get(col);
+				char b = Character.toLowerCase( boxes.get(row).get(col) );
 				if ( g > 0 && b != g) {
 					return false;
 				}
@@ -94,8 +102,8 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-						n.boxes[newAgentRow][newAgentCol] = 0;
+						n.boxes.get(newBoxRow).set(newBoxCol, this.boxes.get(newAgentRow).get(newAgentCol));
+						n.boxes.get(newAgentRow).set(newAgentCol, (char) 0);
 						expandedNodes.add( n );
 					}
 				}
@@ -110,8 +118,8 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
-						n.boxes[boxRow][boxCol] = 0;
+						n.boxes.get(this.agentRow).set(this.agentCol, this.boxes.get(boxRow).get(boxCol));
+						n.boxes.get(boxRow).set(boxCol, (char) 0);
 						expandedNodes.add( n );
 					}
 				}
@@ -122,11 +130,11 @@ public class Node {
 	}
 
 	private boolean cellIsFree( int row, int col ) {
-		return ( !this.walls[row][col] && this.boxes[row][col] == 0 );
+		return ( !NodeStatics.walls.get(row).get(col) && this.boxes.get(row).get(col) == 0 );
 	}
 
 	private boolean boxAt( int row, int col ) {
-		return this.boxes[row][col] > 0;
+		return this.boxes.get(row).get(col) > 0;
 	}
 
 	private int dirToRowChange( dir d ) { 
@@ -139,10 +147,12 @@ public class Node {
 
 	private Node ChildNode() {
 		Node copy = new Node( this );
-		for ( int row = 0; row < MAX_ROW; row++ ) {
-			System.arraycopy( this.walls[row], 0, copy.walls[row], 0, MAX_COLUMN );
-			System.arraycopy( this.boxes[row], 0, copy.boxes[row], 0, MAX_COLUMN );
-			System.arraycopy( this.goals[row], 0, copy.goals[row], 0, MAX_COLUMN );
+		for ( int row = 0; row < this.boxes.size(); row++ ) {
+			copy.boxes.add(new ArrayList<Character>());
+			for (int col = 0; col < this.boxes.get(row).size(); col++) {
+				copy.boxes.get(row).add(this.boxes.get(row).get(col));
+			}
+			//System.arraycopy( this.boxes.get(row), 0, copy.boxes.get(row), 0, this.boxes.get(row).size() );
 		}
 		return copy;
 	}
@@ -163,9 +173,7 @@ public class Node {
 		int result = 1;
 		result = prime * result + agentCol;
 		result = prime * result + agentRow;
-		result = prime * result + Arrays.deepHashCode( boxes );
-		result = prime * result + Arrays.deepHashCode( goals );
-		result = prime * result + Arrays.deepHashCode( walls );
+		result = prime * result + Arrays.deepHashCode( boxes.toArray() );
 		return result;
 	}
 
@@ -182,29 +190,21 @@ public class Node {
 			return false;
 		if ( agentRow != other.agentRow )
 			return false;
-		if ( !Arrays.deepEquals( boxes, other.boxes ) ) {
+		if ( !Arrays.deepEquals( boxes.toArray(), other.boxes.toArray() ) ) {
 			return false;
 		}
-		if ( !Arrays.deepEquals( goals, other.goals ) )
-			return false;
-		if ( !Arrays.deepEquals( walls, other.walls ) )
-			return false;
 		return true;
 	}
 
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		for ( int row = 0; row < MAX_ROW; row++ ) {
-			if ( !this.walls[row][0] ) {
+		for ( int row = 0; row < this.boxes.size(); row++ ) {
+			if ( !NodeStatics.walls.get(row).get(0) ) {
 				break;
 			}
-			for ( int col = 0; col < MAX_COLUMN; col++ ) {
-				if ( this.boxes[row][col] > 0 ) {
-					s.append( this.boxes[row][col] );
-				} else if ( this.goals[row][col] > 0 ) {
-					s.append( this.goals[row][col] );
-				} else if ( this.walls[row][col] ) {
-					s.append( "+" );
+			for ( int col = 0; col < this.boxes.get(row).size(); col++ ) {
+				if ( this.boxes.get(row).get(col) > 0 ) {
+					s.append( this.boxes.get(row).get(col) );
 				} else if ( row == this.agentRow && col == this.agentCol ) {
 					s.append( "0" );
 				} else {
